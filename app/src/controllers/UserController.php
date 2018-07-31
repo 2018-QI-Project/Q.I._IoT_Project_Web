@@ -11,6 +11,7 @@ use Firebase\JWT\JWT;
 
 include_once('./vendor/autoload.php');
 include_once('database.php');
+include_once('secret.php');
 
 define("NONCE_LENGTH", 50);
 
@@ -105,7 +106,7 @@ final class UserController extends BaseController
             $mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers
             $mail->SMTPAuth = true;                               // Enable SMTP authentication
             $mail->Username = 'siyoungkim8994@gmail.com';                 // SMTP username
-            $mail->Password = 'qualcommpw';                           // SMTP password
+            $mail->Password = PW;                           // SMTP password
             $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
             $mail->Port = 587;                                    // TCP port to connect to
 
@@ -442,7 +443,7 @@ final class UserController extends BaseController
             $mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers
             $mail->SMTPAuth = true;                               // Enable SMTP authentication
             $mail->Username = 'siyoungkim8994@gmail.com';                 // SMTP username
-            $mail->Password = 'qualcommpw';                           // SMTP password
+            $mail->Password = PW;                           // SMTP password
             $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
             $mail->Port = 587;                                    // TCP port to connect to
 
