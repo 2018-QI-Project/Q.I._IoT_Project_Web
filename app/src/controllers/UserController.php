@@ -42,7 +42,7 @@ final class UserController extends BaseController
         }
 
         //Query
-        $sql = "SELECT EXISTS(SELECT * FROM USER WHERE EMAIL = '".$email."')";
+        $sql = "SELECT EXISTS(SELECT * FROM TEMP WHERE EMAIL = '".$email."')";
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result);
 
@@ -64,11 +64,10 @@ final class UserController extends BaseController
             //hash password
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            //Insert User Data
-            $sql = "INSERT INTO USER(EMAIL, PASSWORD, NAME, AGE, GENDER, NONCE) VALUES ('".$email."','".$hashed_password."','".$name."',$age,'".$gender."','".$nonce."')";
-            $result = mysqli_query($conn, $sql);
+            $timestamp = time();
 
-            $sql = "INSERT INTO DISEASE(USER_ID,RESPIRATORY,CARDIOVASCULAR) VALUES((SELECT USER_ID FROM USER WHERE EMAIL='".$email."'),$respiratoryDisease,$cardiovascularDisease)";
+            //Insert User Data
+            $sql = "INSERT INTO TEMP(EMAIL, PASSWORD, NAME, AGE, GENDER, NONCE, RESPIRATORY, CARDIOVASCULAR, DATE) VALUES ('".$email."','".$hashed_password."','".$name."',$age,'".$gender."','".$nonce."',$respiratoryDisease, $cardiovascularDisease, $timestamp)";
             $result = mysqli_query($conn, $sql);
 
             //send email
@@ -147,13 +146,44 @@ final class UserController extends BaseController
 
         $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
 
-        $sql = "SELECT EXISTS(SELECT * FROM USER WHERE NONCE = '".$nonce."')";
+        $sql = "DELETE FROM TEMP WHERE (TIMESTAMPDIFF(HOUR, FROM_UNIXTIME(DATE, '%Y-%m-%d %H:%i:%S'), now()))>3";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result);
+
+        $sql = "SELECT EXISTS(SELECT * FROM TEMP WHERE NONCE = '".$nonce."')";
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result);
 
         if($row[0] > 0) {
-            $sql = "UPDATE USER SET NONCE = 'TRUE' WHERE NONCE = '".$nonce."'";
+            $sql = "SELECT * FROM TEMP WHERE NONCE = '".$nonce."'";
             $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+
+            $email = $row['EMAIL'];
+            $password = $row['PASSWORD'];
+            $name = $row['NAME'];
+            $age = $row['AGE'];
+            $gender = $row['GENDER'];
+            $respiratoryDisease = $row['RESPIRATORY'];
+            $cardiovascularDisease = $row['CARDIOVASCULAR'];
+
+            $sql = "DELETE FROM TEMP WHERE NONCE = '".$nonce."'";
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+
+            $sql = "INSERT INTO USER(EMAIL, PASSWORD, NAME, AGE, GENDER, RESPIRATORY, CARDIOVASCULAR) VALUES ('".$email."','".$password."','".$name."',$age,'".$gender."',$respiratoryDisease, $cardiovascularDisease)";
+            echo $sql;
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+        }
+        else {
+            $data = array(
+                'type'=>'error',
+                'value'=>'unregistered user');
+            $encoded=json_encode($data);
+            header('Content-type: application/json');
+
+            echo $encoded;
         }
 
         $this->view->render($response, 'success.html');
@@ -181,74 +211,48 @@ final class UserController extends BaseController
 
         
         if($row[0] > 0) {
-            //Check if user is authorized
-            $sql = "SELECT EXISTS(SELECT * FROM USER WHERE EMAIL = '".$email."' AND NONCE = 'TRUE' )";
+            //Password correct?
+            $sql = "SELECT PASSWORD FROM USER WHERE EMAIL = '".$email."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
+            $hashed_password = $row["PASSWORD"];
 
-            if($row[0] > 0) {
-                //Password correct?
-                $sql = "SELECT PASSWORD FROM USER WHERE EMAIL = '".$email."'";
-                $result = mysqli_query($conn, $sql);
-                $row = mysqli_fetch_array($result);
-                $hashed_password = $row["PASSWORD"];
-
-                if(password_verify($password, $hashed_password)) {
+            if(password_verify($password, $hashed_password)) {
                     //issue token
-                    $token = self::createJWT($email);
+                $token = self::createJWT($email);
 
-                    if($receivedHeaderData[0]=="app") {
-                       $data = array(
-                           'token_app'=>$token);
+                if($receivedHeaderData[0]=="app") {
+                 $data = array(
+                     'token_app'=>$token);
 
-                       $encoded=json_encode($data);
+                 $encoded=json_encode($data);
 
-                       header('Content-type: application/json');
+                 header('Content-type: application/json');
 
-                       echo $encoded;
+                 echo $encoded;
 
-                       $sql = "UPDATE USER SET TOKEN_APP = '".$token."' WHERE EMAIL = '".$email."'";
-                       $result = mysqli_query($conn, $sql);
-                       $row = mysqli_fetch_array($result);
-                    }
-                    else if($receivedHeaderData[0]=="web") {
-                       $data = array(
-                           'token_web'=>$token);
+                 $sql = "UPDATE USER SET TOKEN_APP = '".$token."' WHERE EMAIL = '".$email."'";
+                 $result = mysqli_query($conn, $sql);
+                 $row = mysqli_fetch_array($result);
+             }
+             else if($receivedHeaderData[0]=="web") {
+                 $data = array(
+                     'token_web'=>$token);
 
-                       $encoded=json_encode($data);
+                 $encoded=json_encode($data);
 
-                       header('Content-type: application/json');
+                 header('Content-type: application/json');
 
-                       echo $encoded;
+                 echo $encoded;
 
-                       $sql = "UPDATE USER SET TOKEN_WEB = '".$token."' WHERE EMAIL = '".$email."'";
-                       $result = mysqli_query($conn, $sql);
-                       $row = mysqli_fetch_array($result);
-                    }
-                    else {
-                        $data = array(
-                           'type'=>'error',
-                           'value'=>'not valid client, choose app or web');
-                        $encoded=json_encode($data);
-                        header('Content-type: application/json');
-
-                        echo $encoded;
-                    }
-                }
-                else {
-                    $data = array(
-                     'type'=>'error',
-                     'value'=>'Wrong password');
-                    $encoded=json_encode($data);
-                    header('Content-type: application/json');
-
-                    echo $encoded;
-                }
-            }
-            else {
+                 $sql = "UPDATE USER SET TOKEN_WEB = '".$token."' WHERE EMAIL = '".$email."'";
+                 $result = mysqli_query($conn, $sql);
+                 $row = mysqli_fetch_array($result);
+             }
+             else {
                 $data = array(
-                    'type'=>'error',
-                    'value'=>'Unauthorized User');
+                 'type'=>'error',
+                 'value'=>'not valid client, choose app or web');
                 $encoded=json_encode($data);
                 header('Content-type: application/json');
 
@@ -257,12 +261,37 @@ final class UserController extends BaseController
         }
         else {
             $data = array(
-                'type'=>'error',
-                'value'=>'Unregistered User');
+               'type'=>'error',
+               'value'=>'Wrong password');
             $encoded=json_encode($data);
             header('Content-type: application/json');
 
             echo $encoded;
+        }
+        }
+        else {
+            $sql = "SELECT EXISTS(SELECT * FROM TEMP WHERE EMAIL = '".$email."')";
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+
+            if($row[0] > 0) {
+                $data = array(
+                    'type'=>'error',
+                    'value'=>'Unauthorized User');
+                $encoded=json_encode($data);
+                header('Content-type: application/json');
+
+                echo $encoded;
+            }
+            else {
+                $data = array(
+                    'type'=>'error',
+                    'value'=>'Unregistered User');
+                $encoded=json_encode($data);
+                header('Content-type: application/json');
+
+                echo $encoded;
+            }
         }
 
         mysqli_close($conn);

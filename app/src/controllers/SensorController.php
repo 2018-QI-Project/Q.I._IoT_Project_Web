@@ -10,7 +10,7 @@ final class SensorController extends BaseController
 {
     public function register(Request $request, Response $response, $args)
     {
-
+        
     }
 
     public function unregister(Request $request, Response $response, $args)
