@@ -34,8 +34,11 @@ $app->delete('/accounts/IDcancellation', 'App\Controller\UserController:IDcancel
 $app->post('/sensor/register', 'App\Controller\SensorController:register')
 ->setName('sensor_register');
 
-$app->post('/sensor/unregister', 'App\Controller\SensorController:unregister')
-->setName('sensor_unregister');
+$app->put('/sensor/deregister', 'App\Controller\SensorController:deregister')
+->setName('sensor_deregister');
+
+$app->get('/sensor/sensorlist', 'App\Controller\SensorController:sensorlist')
+->setName('sensor_sensorlist');
 
 $app->post('/data/AQInsert', 'App\Controller\DataController:AQInsert')
 ->setName('data_AQInsert');

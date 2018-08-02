@@ -20,18 +20,16 @@ final class UserController extends BaseController
 {
     public function signup(Request $request, Response $response, $args)
     {
-
-        $receivedData = $request->getParsedBody();
-        
+        $json = $request->getParsedBody();
 
         //Get Data From HTTP Body
-        $email = $receivedData['email'];
-        $password = $receivedData['password'];
-        $name = $receivedData['name'];
-        $age = $receivedData['age'];
-        $gender = $receivedData['gender'];
-        $respiratoryDisease = $receivedData['respiratoryDisease'];
-        $cardiovascularDisease = $receivedData['cardiovascularDisease'];
+        $email = $json['email'];
+        $password = $json['password'];
+        $name = $json['name'];
+        $age = $json['age'];
+        $gender = $json['gender'];
+        $respiratoryDisease = $json['respiratoryDisease'];
+        $cardiovascularDisease = $json['cardiovascularDisease'];
 
         //DB Connection
         $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
@@ -46,7 +44,6 @@ final class UserController extends BaseController
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result);
 
-        //Is duplicated?
         if($row[0] > 0) {
             $data = array(
                 'type'=>'error',
@@ -55,9 +52,26 @@ final class UserController extends BaseController
             header('Content-type: application/json');
 
             echo $encoded;
+            exit();
         }
-        //Not duplicated
         else {
+            //Query
+            $sql = "SELECT EXISTS(SELECT * FROM USER WHERE EMAIL = '".$email."')";
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+
+            if($row[0] > 0) {
+                $data = array(
+                    'type'=>'error',
+                    'value'=>'already existed');
+                $encoded=json_encode($data);
+                header('Content-type: application/json');
+
+                echo $encoded;
+                exit();
+            }
+
+
             //create Nonce
             $nonce = self::createNonce();
 
@@ -172,9 +186,10 @@ final class UserController extends BaseController
             $row = mysqli_fetch_array($result);
 
             $sql = "INSERT INTO USER(EMAIL, PASSWORD, NAME, AGE, GENDER, RESPIRATORY, CARDIOVASCULAR) VALUES ('".$email."','".$password."','".$name."',$age,'".$gender."',$respiratoryDisease, $cardiovascularDisease)";
-            echo $sql;
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
+
+            $this->view->render($response, 'success.html');
         }
         else {
             $data = array(
@@ -186,20 +201,17 @@ final class UserController extends BaseController
             echo $encoded;
         }
 
-        $this->view->render($response, 'success.html');
         mysqli_close($conn);
         return $response;
     }
 
     public function authenticate(Request $request, Response $response, $args)
     {
-        $receivedHeaderData = $request->getHeader('client');
-        $receivedBodyData = $request->getParsedBody();
+        $json = $request->getParsedBody();
         
-
         //JSON PARSING
-        $email = $receivedBodyData['email'];
-        $password = $receivedBodyData['password'];
+        $email = $json['email'];
+        $password = $json['password'];
 
         //Database connect
         $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
@@ -221,7 +233,7 @@ final class UserController extends BaseController
                     //issue token
                 $token = self::createJWT($email);
 
-                if($receivedHeaderData[0]=="app") {
+                if($json['client']=="app") {
                  $data = array(
                      'token_app'=>$token);
 
@@ -235,7 +247,7 @@ final class UserController extends BaseController
                  $result = mysqli_query($conn, $sql);
                  $row = mysqli_fetch_array($result);
              }
-             else if($receivedHeaderData[0]=="web") {
+             else if($json['client']=="web") {
                  $data = array(
                      'token_web'=>$token);
 
@@ -301,22 +313,20 @@ final class UserController extends BaseController
 
     public function validate(Request $request, Response $response, $args)
     {
-        $receivedClientData = $request->getHeader('client');
+        $json = $request->getParsedBody();
 
         //Database Connection
         $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
 
-        if($receivedClientData[0]=='app') {
-            $receivedTokenData = $request->getHeader('tokenApp');
+        if($json['client']=='app') {
+            $tokenApp = $json['tokenApp'];
 
             //Check if token is valid
-            $sql = "SELECT EXISTS(SELECT * FROM USER WHERE TOKEN_APP = '".$receivedTokenData[0]."')";
-            echo $sql;
+            $sql = "SELECT EXISTS(SELECT * FROM USER WHERE TOKEN_APP = '".$tokenApp."')";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
-            echo $row[0];
+
             if($row[0] > 0) {
-                echo "success";
                 $data = array(
                     'type'=>'success',
                     'value'=>'app signin success');
@@ -335,11 +345,11 @@ final class UserController extends BaseController
                 echo $encoded;
             }
         }
-        else if($receivedClientData[0]=='web'){
-            $receivedTokenData = $request->getHeader('tokenWeb');
+        else if($json['client']=='web'){
+            $tokenWeb = $json['tokenWeb'];
 
             //Check if token is valid
-            $sql = "SELECT EXISTS(SELECT * FROM USER WHERE TOKEN_WEB = '".$receivedTokenData[0]."')";
+            $sql = "SELECT EXISTS(SELECT * FROM USER WHERE TOKEN_WEB = '".$tokenWeb."')";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -401,10 +411,10 @@ final class UserController extends BaseController
         //Database Connection
         $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
 
-        $receivedData = $request->getParsedBody();
+        $json = $request->getParsedBody();
         
         //Get Data From HTTP Body
-        $email = $receivedData['email'];
+        $email = $json['email'];
         
         $sql = "SELECT NAME FROM USER WHERE EMAIL = '".$email."'";
         $result = mysqli_query($conn, $sql);
@@ -435,7 +445,7 @@ final class UserController extends BaseController
 
         $data = array(
                     'type'=>'success',
-                    'value'=>'Check you mail');
+                    'value'=>'Check your mail');
                 $encoded=json_encode($data);
                 header('Content-type: application/json');
 
@@ -508,21 +518,19 @@ final class UserController extends BaseController
 
     public function changePassword(Request $request, Response $response, $args)
     {
-        $receivedClientData = $request->getHeader('client');
-
-        $receivedData = $request->getParsedBody();
+        $json = $request->getParsedBody();
         
         //Get Data From HTTP Body
-        $currentPassword = $receivedData['currentPassword'];
-        $newPassword = $receivedData['newPassword'];
+        $currentPassword = $json['currentPassword'];
+        $newPassword = $json['newPassword'];
 
         //Database Connection
         $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
 
-        if($receivedClientData[0]=='app') {
-            $receivedTokenData = $request->getHeader('tokenApp');
+        if($json['client']=='app') {
+            $tokenApp = $json['tokenApp'];
 
-            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_APP = '".$receivedTokenData[0]."'";
+            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_APP = '".$tokenApp."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -538,9 +546,9 @@ final class UserController extends BaseController
             }
 
         }
-        else if($receivedClientData[0]=='web') {
-            $receivedTokenData = $request->getHeader('tokenWeb');
-            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_WEB = '".$receivedTokenData[0]."'";
+        else if($json['client']=='web') {
+            $tokenWeb = $json['tokenWeb'];
+            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_WEB = '".$tokenWeb."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -594,21 +602,19 @@ final class UserController extends BaseController
 
     public function IDcancellation(Request $request, Response $response, $args)
     {
-        $receivedClientData = $request->getHeader('client');
-
-        $receivedData = $request->getParsedBody();
+        $json = $request->getParsedBody();
         
         //Get Data From HTTP Body
-        $receivedPassword = $receivedData['password'];
+        $receivedPassword = $json['password'];
 
         //Database Connection
         $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
 
 
-        if($receivedClientData[0]=='app') {
-            $receivedTokenData = $request->getHeader('tokenApp');
+        if($json['client']=='app') {
+            $tokenApp = $json['tokenApp'];
 
-            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_APP = '".$receivedTokenData[0]."'";
+            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_APP = '".$tokenApp."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -623,9 +629,9 @@ final class UserController extends BaseController
                 exit();
             }
         }
-        else if($receivedClientData[0]=='web') {
-            $receivedTokenData = $request->getHeader('tokenWeb');
-            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_WEB = '".$receivedTokenData[0]."'";
+        else if($json['client']=='web') {
+            $tokenWeb = $json['tokenWeb'];
+            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_WEB = '".$tokenWeb."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -679,15 +685,15 @@ final class UserController extends BaseController
 
      public function signout(Request $request, Response $response, $args)
     {
-        $receivedClientData = $request->getHeader('client');
+        $json = $request->getParsedBody();
 
         //Database Connection
         $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
 
-        if($receivedClientData[0]=='app') {
-            $receivedTokenData = $request->getHeader('tokenApp');
+        if($json['client']=='app') {
+            $tokenApp = $json['tokenApp'];
 
-            $sql = "SELECT EMAIL FROM USER WHERE TOKEN_APP = '".$receivedTokenData[0]."'";
+            $sql = "SELECT EMAIL FROM USER WHERE TOKEN_APP = '".$tokenApp."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -711,10 +717,10 @@ final class UserController extends BaseController
             }
 
         }
-        else if($receivedClientData[0]=='web') {
-            $receivedTokenData = $request->getHeader('tokenWeb');
+        else if($json['client']=='web') {
+            $tokenWeb = $json['tokenWeb'];
 
-            $sql = "SELECT EMAIL FROM USER WHERE TOKEN_WEB = '".$receivedTokenData[0]."'";
+            $sql = "SELECT EMAIL FROM USER WHERE TOKEN_WEB = '".$tokenWeb."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -763,16 +769,72 @@ final class UserController extends BaseController
     /*
     public function BasicFunctionForm(Request $request, Response $response, $args)
     {
-        $receivedClientData = $request->getHeader('client');
+        $json = $request->getParsedBody();
 
         //Database Connection
         $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
 
-        if($receivedClientData[0]=='app') {
-            $receivedTokenData = $request->getHeader('tokenApp');
+        if($json['client']=='app') {
+            $tokenApp = $json['tokenApp'];
+
+            $sql = "SELECT EXISTS(SELECT * FROM USER WHERE TOKEN_APP = '".$tokenApp."')";
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+
+            if($row[0] > 0) {
+
+
+
+
+
+
+
+
+
+
+
+
+            }
+            else {
+                $data = array(
+                    'type'=>'error',
+                    'value'=>'not valid token');
+                $encoded=json_encode($data);
+                header('Content-type: application/json');
+
+                echo $encoded;
+                exit();
+            }
         }
-        else if($receivedClientData[0]=='web') {
-            $receivedTokenData = $request->getHeader('tokenWeb');
+        else if($json['client']=='web') {
+            $tokenWeb = $json['tokenWeb'];
+
+            $sql = "SELECT EXISTS(SELECT * FROM USER WHERE TOKEN_WEB = '".$tokenWeb."')";
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+
+            if($row[0] > 0) {
+
+
+
+
+
+
+
+
+
+
+            }
+            else {
+                $data = array(
+                    'type'=>'error',
+                    'value'=>'not valid token');
+                $encoded=json_encode($data);
+                header('Content-type: application/json');
+
+                echo $encoded;
+                exit();
+            }
         }
         else {
             $data = array(
