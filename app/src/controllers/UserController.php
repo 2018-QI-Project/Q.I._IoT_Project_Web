@@ -81,7 +81,7 @@ final class UserController extends BaseController
             $timestamp = time();
 
             //Insert User Data
-            $sql = "INSERT INTO TEMP(EMAIL, PASSWORD, NAME, AGE, GENDER, NONCE, RESPIRATORY, CARDIOVASCULAR, DATE) VALUES ('".$email."','".$hashed_password."','".$name."',$age,'".$gender."','".$nonce."',$respiratoryDisease, $cardiovascularDisease, $timestamp)";
+            $sql = "INSERT INTO TEMP(EMAIL, HASHPWD, NAME, AGE, GENDER, NONCE, RESPIRATORY, CARDIOVASCULAR, DATE) VALUES ('".$email."','".$hashed_password."','".$name."',$age,'".$gender."','".$nonce."',$respiratoryDisease, $cardiovascularDisease, $timestamp)";
             $result = mysqli_query($conn, $sql);
 
             //send email
@@ -174,7 +174,7 @@ final class UserController extends BaseController
             $row = mysqli_fetch_array($result);
 
             $email = $row['EMAIL'];
-            $password = $row['PASSWORD'];
+            $password = $row['HASHPWD'];
             $name = $row['NAME'];
             $age = $row['AGE'];
             $gender = $row['GENDER'];
@@ -185,7 +185,7 @@ final class UserController extends BaseController
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
-            $sql = "INSERT INTO USER(EMAIL, PASSWORD, NAME, AGE, GENDER, RESPIRATORY, CARDIOVASCULAR) VALUES ('".$email."','".$password."','".$name."',$age,'".$gender."',$respiratoryDisease, $cardiovascularDisease)";
+            $sql = "INSERT INTO USER(EMAIL, HASHPWD, NAME, AGE, GENDER, RESPIRATORY, CARDIOVASCULAR) VALUES ('".$email."','".$password."','".$name."',$age,'".$gender."',$respiratoryDisease, $cardiovascularDisease)";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -224,10 +224,10 @@ final class UserController extends BaseController
         
         if($row[0] > 0) {
             //Password correct?
-            $sql = "SELECT PASSWORD FROM USER WHERE EMAIL = '".$email."'";
+            $sql = "SELECT HASHPWD FROM USER WHERE EMAIL = '".$email."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
-            $hashed_password = $row["PASSWORD"];
+            $hashed_password = $row["HASHPWD"];
 
             if(password_verify($password, $hashed_password)) {
                     //issue token
@@ -425,7 +425,7 @@ final class UserController extends BaseController
             $newPassword = self::generateRandomPassword();
             $hashed_password = password_hash($newPassword, PASSWORD_DEFAULT);
 
-            $sql = "UPDATE USER SET PASSWORD = '".$hashed_password."' WHERE EMAIL = '".$email."'";
+            $sql = "UPDATE USER SET HASHPWD = '".$hashed_password."' WHERE EMAIL = '".$email."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -530,7 +530,7 @@ final class UserController extends BaseController
         if($json['client']=='app') {
             $tokenApp = $json['tokenApp'];
 
-            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_APP = '".$tokenApp."'";
+            $sql = "SELECT EMAIL, HASHPWD FROM USER WHERE TOKEN_APP = '".$tokenApp."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -548,7 +548,7 @@ final class UserController extends BaseController
         }
         else if($json['client']=='web') {
             $tokenWeb = $json['tokenWeb'];
-            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_WEB = '".$tokenWeb."'";
+            $sql = "SELECT EMAIL, HASHPWD FROM USER WHERE TOKEN_WEB = '".$tokenWeb."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -575,7 +575,7 @@ final class UserController extends BaseController
         }
 
         $email = $row["EMAIL"];
-        $dbPassword = $row["PASSWORD"];
+        $dbPassword = $row["HASHPWD"];
 
         if(!password_verify($currentPassword, $dbPassword)) {
             $data = array(
@@ -590,11 +590,17 @@ final class UserController extends BaseController
 
         $hashed_password = password_hash($newPassword, PASSWORD_DEFAULT);
 
-        $sql = "UPDATE USER SET PASSWORD = '".$hashed_password."' WHERE EMAIL = '".$email."'";
+        $sql = "UPDATE USER SET HASHPWD = '".$hashed_password."' WHERE EMAIL = '".$email."'";
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result);
 
-        echo "Password changed!";
+        $data = array(
+            'type'=>'success',
+            'value'=>'password changed');
+        $encoded=json_encode($data);
+        header('Content-type: application/json');
+
+        echo $encoded;
 
         mysqli_close($conn);
         return $response;
@@ -614,7 +620,7 @@ final class UserController extends BaseController
         if($json['client']=='app') {
             $tokenApp = $json['tokenApp'];
 
-            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_APP = '".$tokenApp."'";
+            $sql = "SELECT EMAIL, HASHPWD FROM USER WHERE TOKEN_APP = '".$tokenApp."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -631,7 +637,7 @@ final class UserController extends BaseController
         }
         else if($json['client']=='web') {
             $tokenWeb = $json['tokenWeb'];
-            $sql = "SELECT EMAIL, PASSWORD FROM USER WHERE TOKEN_WEB = '".$tokenWeb."'";
+            $sql = "SELECT EMAIL, HASHPWD FROM USER WHERE TOKEN_WEB = '".$tokenWeb."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -658,7 +664,7 @@ final class UserController extends BaseController
         }
 
         $email = $row["EMAIL"];
-        $password = $row["PASSWORD"];
+        $password = $row["HASHPWD"];
 
         if(password_verify($receivedPassword, $password)) {
 
@@ -666,7 +672,13 @@ final class UserController extends BaseController
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
-            echo "ID Cancellation!";
+            $data = array(
+            'type'=>'success',
+            'value'=>'ID Cancellation');
+             $encoded=json_encode($data);
+            header('Content-type: application/json');
+
+            echo $encoded;
         }
         else {
             $data = array(
