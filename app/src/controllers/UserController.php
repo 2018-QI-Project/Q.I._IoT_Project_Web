@@ -86,6 +86,14 @@ final class UserController extends BaseController
 
             //send email
             self::sendVerificationMail($email, $nonce, $name);
+
+            $data = array(
+                'type'=>'success',
+                'value'=>'sign up success');
+            $encoded=json_encode($data);
+            header('Content-type: application/json');
+
+            echo $encoded;
         }
 
         mysqli_close($conn);
@@ -220,7 +228,6 @@ final class UserController extends BaseController
         $sql = "SELECT EXISTS(SELECT * FROM USER WHERE EMAIL = '".$email."')";
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result);
-
         
         if($row[0] > 0) {
             //Password correct?
@@ -234,34 +241,39 @@ final class UserController extends BaseController
                 $token = self::createJWT($email);
 
                 if($json['client']=="app") {
-                 $data = array(
-                     'token_app'=>$token);
+                   $data = array(
+                       'token_app'=>$token,
+                       'type'=>'success',
+                       'value'=>'issued token_app'
+                   );
 
-                 $encoded=json_encode($data);
+                   $encoded=json_encode($data);
 
-                 header('Content-type: application/json');
+                   header('Content-type: application/json');
 
-                 echo $encoded;
+                   echo $encoded;
 
-                 $sql = "UPDATE USER SET TOKEN_APP = '".$token."' WHERE EMAIL = '".$email."'";
-                 $result = mysqli_query($conn, $sql);
-                 $row = mysqli_fetch_array($result);
-             }
-             else if($json['client']=="web") {
-                 $data = array(
-                     'token_web'=>$token);
+                   $sql = "UPDATE USER SET TOKEN_APP = '".$token."' WHERE EMAIL = '".$email."'";
+                   $result = mysqli_query($conn, $sql);
+                   $row = mysqli_fetch_array($result);
+               }
+               else if($json['client']=="web") {
+                   $data = array(
+                       'token_web'=>$token,
+                       'type'=>'success',
+                       'value'=>'issued token_web'
+                   );
+                   $encoded=json_encode($data);
+                   
+                   header('Content-type: application/json');
 
-                 $encoded=json_encode($data);
+                   echo $encoded;
 
-                 header('Content-type: application/json');
-
-                 echo $encoded;
-
-                 $sql = "UPDATE USER SET TOKEN_WEB = '".$token."' WHERE EMAIL = '".$email."'";
-                 $result = mysqli_query($conn, $sql);
-                 $row = mysqli_fetch_array($result);
-             }
-             else {
+                   $sql = "UPDATE USER SET TOKEN_WEB = '".$token."' WHERE EMAIL = '".$email."'";
+                   $result = mysqli_query($conn, $sql);
+                   $row = mysqli_fetch_array($result);
+               }
+               else {
                 $data = array(
                  'type'=>'error',
                  'value'=>'not valid client, choose app or web');
