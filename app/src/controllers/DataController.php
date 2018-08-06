@@ -69,9 +69,11 @@ final class DataController extends BaseController
         $no2 = $json['no2'];
         $so2 = $json['so2'];
         $o3 = $json['o3'];
-        $pm25 = $json['pm2_5'];
+        $pm25 = $json['pm25'];
+        $latitude = $json['latitude'];
+        $longitude = $json['longitude'];
 
-        $sql = "SELECT SENSOR_ID FROM SENSOR WHERE ADDRESS = '".$address."'";
+        $sql = "SELECT SENSOR_ID FROM SENSOR WHERE ADDRESS = '".$address."' AND TYPE = '".air."' ";
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result);
 
@@ -89,7 +91,7 @@ final class DataController extends BaseController
         $sensorID = $row["SENSOR_ID"];
         $timestamp = time();
 
-        $sql = "INSERT INTO AIR(USER_ID, AIR_SENSOR_ID, DATE, CO, NO2, SO2, O3, PM2_5) VALUES ('".$userID."', '".$sensorID."', $timestamp, $co, $no2, $so2, $o3, $pm25)";
+        $sql = "INSERT INTO AIR(USER_ID, AIR_SENSOR_ID, DATE, CO, NO2, SO2, O3, PM2_5, LOCATION_LAT, LOCATION_LON) VALUES ($userID, $sensorID, $timestamp, $co, $no2, $so2, $o3, $pm25, $latitude, $longitude)";
         $result = mysqli_query($conn, $sql);
 
         $data = array(
@@ -164,7 +166,7 @@ final class DataController extends BaseController
         $heartRate = $json['heartRate'];
         $rrInterval = $json['rrInterval'];
 
-        $sql = "SELECT SENSOR_ID FROM SENSOR WHERE ADDRESS = '".$address."'";
+        $sql = "SELECT SENSOR_ID FROM SENSOR WHERE ADDRESS = '".$address."' AND TYPE = '".heart."'";
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result);
 
@@ -182,8 +184,10 @@ final class DataController extends BaseController
         $sensorID = $row["SENSOR_ID"];
         $timestamp = time();
 
-        $sql = "INSERT INTO HEART(USER_ID, HEART_SENSOR_ID, DATE, HEART_RATE, RR_INTERVAL) VALUES ('".$userID."', '".$sensorID."', $timestamp, $heartRate, $rrInterval)";
+        $sql = "INSERT INTO HEART(USER_ID, HEART_SENSOR_ID, DATE, HEART_RATE, RR_INTERVAL) VALUES ($userID, $sensorID, $timestamp, $heartRate, $rrInterval)";
         $result = mysqli_query($conn, $sql);
+
+        echo $sql;
 
         $data = array(
             'type'=>'success',
