@@ -64,7 +64,7 @@ final class SensorController extends BaseController
                     exit();
                 }
 
-    			$sql = "INSERT INTO SENSOR(USER_ID, ADDRESS, TYPE, STATUS) VALUES ('".$id."','".$address."','".$type."', 1)";
+    			$sql = "INSERT INTO SENSOR(USER_ID, ADDRESS, TYPE, STATUS) VALUES ('".$userID."','".$address."','".$type."', 1)";
     			$result = mysqli_query($conn, $sql);
     		}
     		else {
@@ -126,7 +126,7 @@ final class SensorController extends BaseController
                     exit();
                 }
 
-    			$sql = "INSERT INTO SENSOR(USER_ID, ADDRESS, TYPE, STATUS) VALUES ('".$id."','".$address."','".$type."', 1)";
+    			$sql = "INSERT INTO SENSOR(USER_ID, ADDRESS, TYPE, STATUS) VALUES ('".$userID."','".$address."','".$type."', 1)";
     			$result = mysqli_query($conn, $sql);
     		}
     		else {
