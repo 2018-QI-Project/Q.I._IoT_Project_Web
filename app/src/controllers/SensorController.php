@@ -330,14 +330,11 @@ final class SensorController extends BaseController
 
             $type = array();
             $address = array();
-            
+
             while($row = mysqli_fetch_array($result)) {
                 array_push($type, $row["TYPE"]);
                 array_push($address, $row["ADDRESS"]);
             }
-
-            print_r($type);
-            print_r($address);
 
             if("air"==$type[0]) {
                 $data = array(
