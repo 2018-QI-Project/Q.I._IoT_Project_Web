@@ -316,7 +316,6 @@ final class SensorController extends BaseController
 
             $sql = "SELECT ADDRESS, TYPE FROM SENSOR WHERE USER_ID = '".$userID."' AND STATUS = 1";
             $result = mysqli_query($conn, $sql);
-            $row = mysqli_fetch_array($result);
 
             if($result->num_rows==0) {
                 $data = array(
@@ -329,10 +328,16 @@ final class SensorController extends BaseController
                 exit();
             }
 
+            $type = array();
+            $address = array();
+            
             while($row = mysqli_fetch_array($result)) {
-                array_push($type, $row['TYPE']);
-                array_push($address, $row['ADDRESS']);
+                array_push($type, $row["TYPE"]);
+                array_push($address, $row["ADDRESS"]);
             }
+
+            print_r($type);
+            print_r($address);
 
             if("air"==$type[0]) {
                 $data = array(
