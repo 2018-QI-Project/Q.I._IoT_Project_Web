@@ -85,17 +85,17 @@ final class SensorController extends BaseController
     		$result = mysqli_query($conn, $sql);
     		$row = mysqli_fetch_array($result);
 
+
     		if($row[0] > 0) {
     			$sql = "SELECT USER_ID FROM USER WHERE TOKEN_WEB = '".$tokenWeb."'";
     			$result = mysqli_query($conn, $sql);
     			$row = mysqli_fetch_array($result);
-
     			$id = $row["USER_ID"];
 
             	//Get Data From HTTP Body
     			$address = $json['address'];
     			$type = $json['type'];
-
+                
     			$sql = "SELECT EXISTS(SELECT * FROM SENSOR WHERE ADDRESS = '".$address."')";
     			$result = mysqli_query($conn, $sql);
     			$row = mysqli_fetch_array($result);
@@ -321,7 +321,7 @@ final class SensorController extends BaseController
             if($result->num_rows==0) {
                 $data = array(
                     'type'=>'error',
-                    'value'=>'There are not sensors registered now';
+                    'value'=>'There are not sensors registered now');
                 $encoded=json_encode($data);
                 header('Content-type: application/json');
 

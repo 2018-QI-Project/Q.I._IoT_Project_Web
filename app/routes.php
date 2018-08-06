@@ -37,7 +37,7 @@ $app->post('/sensor/register', 'App\Controller\SensorController:register')
 $app->put('/sensor/deregister', 'App\Controller\SensorController:deregister')
 ->setName('sensor_deregister');
 
-$app->get('/sensor/sensorlist', 'App\Controller\SensorController:sensorlist')
+$app->post('/sensor/sensorlist', 'App\Controller\SensorController:sensorlist')
 ->setName('sensor_sensorlist');
 
 $app->post('/data/AQInsert', 'App\Controller\DataController:AQInsert')
