@@ -171,7 +171,6 @@ final class SensorController extends BaseController
 
         //Get Data From HTTP Body
     	$address = $json['address'];
-    	$type = $json['type'];
 
     	$sql = "SELECT EXISTS(SELECT * FROM SENSOR WHERE ADDRESS = '".$address."')";
     	$result = mysqli_query($conn, $sql);

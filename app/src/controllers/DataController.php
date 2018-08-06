@@ -187,8 +187,6 @@ final class DataController extends BaseController
         $sql = "INSERT INTO HEART(USER_ID, HEART_SENSOR_ID, DATE, HEART_RATE, RR_INTERVAL) VALUES ($userID, $sensorID, $timestamp, $heartRate, $rrInterval)";
         $result = mysqli_query($conn, $sql);
 
-        echo $sql;
-
         $data = array(
             'type'=>'success',
             'value'=>'recorded heart data');
@@ -201,7 +199,7 @@ final class DataController extends BaseController
         return $response;
     }
 
-    public function GetRealtimeAQ(Request $request, Response $response, $args)
+    public function getRealtimeAQ(Request $request, Response $response, $args)
     {
         $json = $request->getParsedBody();
 
@@ -256,6 +254,7 @@ final class DataController extends BaseController
         }
 
         $userID = $row["USER_ID"];
+        $address = $json['address'];
 
         $sql = "SELECT SENSOR_ID FROM SENSOR WHERE ADDRESS = '".$address."' AND TYPE = '".air."'";
         $result = mysqli_query($conn, $sql);
@@ -274,14 +273,15 @@ final class DataController extends BaseController
 
         $sensorID = $row["SENSOR_ID"];
 
-        $sql = "SELECT DATE, CO, NO2, SO2, O3, PM25, LOCATION_LAT, LOCATION_LON FROM AIR WHERE AIR_SENSOR_ID = '".$sensorID."' AND DATE in (SELECT MAX(DATE) FROM AIR GROUP BY AIR_SENSOR_ID)";
+        $sql = "SELECT DATE, CO, NO2, SO2, O3, PM2_5, LOCATION_LAT, LOCATION_LON FROM AIR WHERE AIR_SENSOR_ID = '".$sensorID."' AND DATE in (SELECT MAX(DATE) FROM AIR GROUP BY AIR_SENSOR_ID)";
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result);
+
 
         if($result->num_rows == 0) {
             $data = array(
                 'type'=>'error',
-                'value'=>'not any data');
+                'value'=>'nothing data');
             $encoded=json_encode($data);
             header('Content-type: application/json');
 
@@ -289,26 +289,144 @@ final class DataController extends BaseController
             exit();
         }
 
+        $date = $row["DATE"];
+        $co = $row["CO"];
+        $no2 = $row["NO2"];
+        $so2 = $row["SO2"];
+        $o3 = $row["O3"];
+        $pm25 = $row["PM2_5"];
+        $latitude = $row["LOCATION_LAT"];
+        $longitude = $row["LOCATION_LON"];
 
+        $airData = array('date'=>$date, 'co'=>$co, 'no2'=>$no2, 'so2'=>$so2, 'o3'=>$o3, 'pm25'=>$pm25, 'latitude'=>$latitude, 'longitude'=>$longitude);
 
+        $data = array(
+            'type'=>'success',
+            'value'=>'The most current air data',
+            'airData'=>$airData);
+        $encoded=json_encode($data);
+        header('Content-type: application/json');
 
-
-
-
+        echo $encoded;
 
         mysqli_close($conn);
         return $response;
     }
 
-    public function GetRealtimeHR(Request $request, Response $response, $args)
+    public function getRealtimeHR(Request $request, Response $response, $args)
+    {
+        $json = $request->getParsedBody();
+
+        //Database Connection
+        $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
+
+        if($json['client']=='app') {
+            $tokenApp = $json['tokenApp'];
+
+            $sql = "SELECT USER_ID FROM USER WHERE TOKEN_APP = '".$tokenApp."'";
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+
+            if($result->num_rows == 0) {
+                $data = array(
+                    'type'=>'error',
+                    'value'=>'not valid token');
+                $encoded=json_encode($data);
+                header('Content-type: application/json');
+
+                echo $encoded;
+                exit();
+            }
+        }
+        else if($json['client']=='web') {
+            $tokenWeb = $json['tokenWeb'];
+
+            $sql = "SELECT USER_ID FROM USER WHERE TOKEN_APP = '".$tokenWeb."'";
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+
+            if($result->num_rows == 0) {
+                $data = array(
+                    'type'=>'error',
+                    'value'=>'not valid token');
+                $encoded=json_encode($data);
+                header('Content-type: application/json');
+
+                echo $encoded;
+                exit();
+            }
+        }
+        else {
+            $data = array(
+                    'type'=>'error',
+                    'value'=>'invalid client type');
+                $encoded=json_encode($data);
+                header('Content-type: application/json');
+
+                echo $encoded;
+                exit();
+        }
+
+        $userID = $row["USER_ID"];
+        $address = $json['address'];
+
+        $sql = "SELECT SENSOR_ID FROM SENSOR WHERE ADDRESS = '".$address."' AND TYPE = '".heart."'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result);
+
+        if($result->num_rows == 0) {
+            $data = array(
+                'type'=>'error',
+                'value'=>'not registered sensor');
+            $encoded=json_encode($data);
+            header('Content-type: application/json');
+
+            echo $encoded;
+            exit();
+        }
+
+        $sensorID = $row["SENSOR_ID"];
+
+        $sql = "SELECT DATE, HEART_RATE, RR_INTERVAL FROM HEART WHERE HEART_SENSOR_ID = '".$sensorID."' AND DATE in (SELECT MAX(DATE) FROM HEART GROUP BY HEART_SENSOR_ID)";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result);
+
+
+        if($result->num_rows == 0) {
+            $data = array(
+                'type'=>'error',
+                'value'=>'nothing data');
+            $encoded=json_encode($data);
+            header('Content-type: application/json');
+
+            echo $encoded;
+            exit();
+        }
+
+        $date = $row["DATE"];
+        $heartRate = $row["HEART_RATE"];
+        $rrInterval = $row["RR_INTERVAL"];
+
+        $heartData = array('date'=>$date, 'heartRate'=>$heartRate, 'rrInterval'=>$rrInterval);
+
+        $data = array(
+            'type'=>'success',
+            'value'=>'The most current heart data',
+            'airData'=>$heartData);
+        $encoded=json_encode($data);
+        header('Content-type: application/json');
+
+        echo $encoded;
+
+        mysqli_close($conn);
+        return $response;
+    }
+
+    public function getHistoricalAQ(Request $request, Response $response, $args)
     {
     }
 
-    public function GetHistoricalAQ(Request $request, Response $response, $args)
-    {
-    }
-
-    public function GetHistoricalHR(Request $request, Response $response, $args)
+    public function getHistoricalHR(Request $request, Response $response, $args)
     {
     }
 }

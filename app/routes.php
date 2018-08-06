@@ -46,14 +46,14 @@ $app->post('/data/AQInsert', 'App\Controller\DataController:AQInsert')
 $app->post('/data/HRInsert', 'App\Controller\DataController:HRInsert')
 ->setName('data_HRInsert');
 
-$app->post('/data/GetRealtimeAQ', 'App\Controller\DataController:GetRealtimeAQ')
-->setName('data_GetRealtimeAQ');
+$app->post('/data/getRealtimeAQ', 'App\Controller\DataController:getRealtimeAQ')
+->setName('data_getRealtimeAQ');
 
-$app->post('/data/GetRealtimeHR', 'App\Controller\DataController:GetRealtimeHR')
-->setName('data_GetRealtimeHR');
+$app->post('/data/getRealtimeHR', 'App\Controller\DataController:getRealtimeHR')
+->setName('data_getRealtimeHR');
 
-$app->post('/data/GetHistoricalAQ', 'App\Controller\DataController:GetHistoricalAQ')
-->setName('data_GetHistoricalAQ');
+$app->post('/data/getHistoricalAQ', 'App\Controller\DataController:getHistoricalAQ')
+->setName('data_getHistoricalAQ');
 
-$app->post('/data/GetHistoricalHR', 'App\Controller\DataController:GetHistoricalHR')
-->setName('data_GetHistoricalHR');
+$app->post('/data/getHistoricalHR', 'App\Controller\DataController:getHistoricalHR')
+->setName('data_getHistoricalHR');
