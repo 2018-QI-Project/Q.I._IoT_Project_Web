@@ -202,7 +202,7 @@ final class UserController extends BaseController
         else {
             $data = array(
                 'type'=>'error',
-                'value'=>'unregistered user');
+                'value'=>'unregistered user or already verified');
             $encoded=json_encode($data);
             header('Content-type: application/json');
 

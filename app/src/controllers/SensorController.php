@@ -27,7 +27,7 @@ final class SensorController extends BaseController
     			$result = mysqli_query($conn, $sql);
     			$row = mysqli_fetch_array($result);
 
-    			$id = $row["USER_ID"];
+    			$userID = $row["USER_ID"];
 
 
         		//Get Data From HTTP Body
@@ -49,7 +49,7 @@ final class SensorController extends BaseController
     				exit();
     			}
 
-                $sql = "SELECT EXISTS(SELECT * FROM SENSOR WHERE TYPE = '".$type."' AND STATUS = 1)";
+                $sql = "SELECT EXISTS(SELECT * FROM SENSOR WHERE USER_ID = '".$userID."' AND TYPE = '".$type."' AND STATUS = 1)";
                 $result = mysqli_query($conn, $sql);
                 $row = mysqli_fetch_array($result);
 
@@ -90,7 +90,7 @@ final class SensorController extends BaseController
     			$sql = "SELECT USER_ID FROM USER WHERE TOKEN_WEB = '".$tokenWeb."'";
     			$result = mysqli_query($conn, $sql);
     			$row = mysqli_fetch_array($result);
-    			$id = $row["USER_ID"];
+    			$userID = $row["USER_ID"];
 
             	//Get Data From HTTP Body
     			$address = $json['address'];
@@ -111,7 +111,7 @@ final class SensorController extends BaseController
     				exit();
     			}
 
-                $sql = "SELECT EXISTS(SELECT * FROM SENSOR WHERE TYPE = '".$type."' AND STATUS = 1)";
+                $sql = "SELECT EXISTS(SELECT * FROM SENSOR WHERE USER_ID = '".$userID."' AND  TYPE = '".$type."' AND STATUS = 1)";
                 $result = mysqli_query($conn, $sql);
                 $row = mysqli_fetch_array($result);
 

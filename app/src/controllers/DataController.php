@@ -203,6 +203,101 @@ final class DataController extends BaseController
 
     public function GetRealtimeAQ(Request $request, Response $response, $args)
     {
+        $json = $request->getParsedBody();
+
+        //Database Connection
+        $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
+
+        if($json['client']=='app') {
+            $tokenApp = $json['tokenApp'];
+
+            $sql = "SELECT USER_ID FROM USER WHERE TOKEN_APP = '".$tokenApp."'";
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+
+            if($result->num_rows == 0) {
+                $data = array(
+                    'type'=>'error',
+                    'value'=>'not valid token');
+                $encoded=json_encode($data);
+                header('Content-type: application/json');
+
+                echo $encoded;
+                exit();
+            }
+        }
+        else if($json['client']=='web') {
+            $tokenWeb = $json['tokenWeb'];
+
+            $sql = "SELECT USER_ID FROM USER WHERE TOKEN_APP = '".$tokenWeb."'";
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+
+            if($result->num_rows == 0) {
+                $data = array(
+                    'type'=>'error',
+                    'value'=>'not valid token');
+                $encoded=json_encode($data);
+                header('Content-type: application/json');
+
+                echo $encoded;
+                exit();
+            }
+        }
+        else {
+            $data = array(
+                    'type'=>'error',
+                    'value'=>'invalid client type');
+                $encoded=json_encode($data);
+                header('Content-type: application/json');
+
+                echo $encoded;
+                exit();
+        }
+
+        $userID = $row["USER_ID"];
+
+        $sql = "SELECT SENSOR_ID FROM SENSOR WHERE ADDRESS = '".$address."' AND TYPE = '".air."'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result);
+
+        if($result->num_rows == 0) {
+            $data = array(
+                'type'=>'error',
+                'value'=>'not registered sensor');
+            $encoded=json_encode($data);
+            header('Content-type: application/json');
+
+            echo $encoded;
+            exit();
+        }
+
+        $sensorID = $row["SENSOR_ID"];
+
+        $sql = "SELECT DATE, CO, NO2, SO2, O3, PM25, LOCATION_LAT, LOCATION_LON FROM AIR WHERE AIR_SENSOR_ID = '".$sensorID."' AND DATE in (SELECT MAX(DATE) FROM AIR GROUP BY AIR_SENSOR_ID)";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result);
+
+        if($result->num_rows == 0) {
+            $data = array(
+                'type'=>'error',
+                'value'=>'not any data');
+            $encoded=json_encode($data);
+            header('Content-type: application/json');
+
+            echo $encoded;
+            exit();
+        }
+
+
+
+
+
+
+
+
+        mysqli_close($conn);
+        return $response;
     }
 
     public function GetRealtimeHR(Request $request, Response $response, $args)
