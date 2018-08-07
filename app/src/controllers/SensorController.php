@@ -78,68 +78,6 @@ final class SensorController extends BaseController
     			exit();
     		}
     	}
-    	else if($json['client']=='web') {
-    		$tokenWeb = $json['tokenWeb'];
-
-    		$sql = "SELECT EXISTS(SELECT * FROM USER WHERE TOKEN_WEB = '".$tokenWeb."')";
-    		$result = mysqli_query($conn, $sql);
-    		$row = mysqli_fetch_array($result);
-
-
-    		if($row[0] > 0) {
-    			$sql = "SELECT USER_ID FROM USER WHERE TOKEN_WEB = '".$tokenWeb."'";
-    			$result = mysqli_query($conn, $sql);
-    			$row = mysqli_fetch_array($result);
-    			$userID = $row["USER_ID"];
-
-            	//Get Data From HTTP Body
-    			$address = $json['address'];
-    			$type = $json['type'];
-                
-    			$sql = "SELECT EXISTS(SELECT * FROM SENSOR WHERE ADDRESS = '".$address."')";
-    			$result = mysqli_query($conn, $sql);
-    			$row = mysqli_fetch_array($result);
-
-    			if($row[0]>0) {
-    				$data = array(
-    					'type'=>'error',
-    					'value'=>'already registered sensor');
-    				$encoded=json_encode($data);
-    				header('Content-type: application/json');
-
-    				echo $encoded;
-    				exit();
-    			}
-
-                $sql = "SELECT EXISTS(SELECT * FROM SENSOR WHERE USER_ID = '".$userID."' AND  TYPE = '".$type."' AND STATUS = 1)";
-                $result = mysqli_query($conn, $sql);
-                $row = mysqli_fetch_array($result);
-
-                if($row[0]>0) {
-                    $data = array(
-                        'type'=>'error',
-                        'value'=>'you already have sensor');
-                    $encoded=json_encode($data);
-                    header('Content-type: application/json');
-
-                    echo $encoded;
-                    exit();
-                }
-
-    			$sql = "INSERT INTO SENSOR(USER_ID, ADDRESS, TYPE, STATUS) VALUES ('".$userID."','".$address."','".$type."', 1)";
-    			$result = mysqli_query($conn, $sql);
-    		}
-    		else {
-    			$data = array(
-    				'type'=>'error',
-    				'value'=>'not valid token');
-    			$encoded=json_encode($data);
-    			header('Content-type: application/json');
-
-    			echo $encoded;
-    			exit();
-    		}
-    	}
     	else {
     		$data = array(
     			'type'=>'error',
@@ -211,29 +149,6 @@ final class SensorController extends BaseController
     			exit();
     		}
     	}
-    	else if($json['client']=='web') {
-    		$tokenWeb = $json['tokenWeb'];
-
-    		$sql = "SELECT EXISTS(SELECT * FROM USER WHERE TOKEN_WEB = '".$tokenWeb."')";
-    		$result = mysqli_query($conn, $sql);
-    		$row = mysqli_fetch_array($result);
-
-    		if($row[0] > 0) {
-    			$sql = "UPDATE SENSOR SET STATUS = 0 WHERE ADDRESS = '".$address."'";
-    			$result = mysqli_query($conn, $sql);
-    			$row = mysqli_fetch_array($result);
-    		}
-    		else {
-    			$data = array(
-    				'type'=>'error',
-    				'value'=>'not valid token');
-    			$encoded=json_encode($data);
-    			header('Content-type: application/json');
-
-    			echo $encoded;
-    			exit();
-    		}
-    	}
     	else {
     		$data = array(
     			'type'=>'error',
@@ -285,7 +200,7 @@ final class SensorController extends BaseController
         else if($json['client']=='web') {
             $tokenWeb = $json['tokenWeb'];
 
-            $sql = "SELECT USER_ID FROM USER WHERE TOKEN_APP = '".$tokenWeb."'";
+            $sql = "SELECT USER_ID FROM USER WHERE TOKEN_WEB = '".$tokenWeb."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 

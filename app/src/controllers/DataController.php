@@ -33,24 +33,6 @@ final class DataController extends BaseController
                 exit();
             }
         }
-        else if($json['client']=='web') {
-            $tokenWeb = $json['tokenWeb'];
-
-            $sql = "SELECT USER_ID FROM USER WHERE TOKEN_APP = '".$tokenWeb."'";
-            $result = mysqli_query($conn, $sql);
-            $row = mysqli_fetch_array($result);
-
-            if($result->num_rows == 0) {
-                $data = array(
-                    'type'=>'error',
-                    'value'=>'not valid token');
-                $encoded=json_encode($data);
-                header('Content-type: application/json');
-
-                echo $encoded;
-                exit();
-            }
-        }
         else {
             $data = array(
                 'type'=>'error',
@@ -117,24 +99,6 @@ final class DataController extends BaseController
             $tokenApp = $json['tokenApp'];
 
             $sql = "SELECT USER_ID FROM USER WHERE TOKEN_APP = '".$tokenApp."'";
-            $result = mysqli_query($conn, $sql);
-            $row = mysqli_fetch_array($result);
-
-            if($result->num_rows == 0) {
-                $data = array(
-                    'type'=>'error',
-                    'value'=>'not valid token');
-                $encoded=json_encode($data);
-                header('Content-type: application/json');
-
-                echo $encoded;
-                exit();
-            }
-        }
-        else if($json['client']=='web') {
-            $tokenWeb = $json['tokenWeb'];
-
-            $sql = "SELECT USER_ID FROM USER WHERE TOKEN_APP = '".$tokenWeb."'";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
@@ -412,7 +376,7 @@ final class DataController extends BaseController
         $data = array(
             'type'=>'success',
             'value'=>'The most current heart data',
-            'airData'=>$heartData);
+            'heartData'=>$heartData);
         $encoded=json_encode($data);
         header('Content-type: application/json');
 
