@@ -928,7 +928,7 @@
                                     <div class="row">
                                         <!-- ICON -->
                                         <div class="col-xs-5">
-                                            <div class="icon-big icon-hazardous text-center">
+                                            <div class="icon-big icon-heart text-center">
                                                 <i class="ti-ruler"></i>
                                             </div>
                                         </div>
@@ -946,7 +946,7 @@
                                     <div class="footer" style="text-align:right">
                                         <hr />
                                         <div class="stats">
-                                            <i class="ti-control-forward"></i> hazardous
+                                            <i class="ti-control-forward"></i> ˚F
                                         </div>
                                     </div>
                                 </div>
