@@ -485,12 +485,12 @@
                             var formattedTime = year + "-" + month.substr(-2) + "-" + day.substr(-2) + " " + hours.substr(-2) + ":" + minutes.substr(-2) + ":" + seconds.substr(-2);
 
 
-                            $('#co').html(co);
-                            $('#no2').html(no2);
-                            $('#so2').html(so2);
-                            $('#o3').html(o3);
-                            $('#pm25').html(pm25);
-                            $('#temperature').html(temperature);
+                            $('#co').html(Math.round(co));
+                            $('#no2').html(Math.round(no2));
+                            $('#so2').html(Math.round(so2));
+                            $('#o3').html(Math.round(o3));
+                            $('#pm25').html(Math.round(pm25));
+                            $('#temperature').html(Math.round(temperature));
                             $('#air_date').html(formattedTime);
                             $('#latitude').html(latitude);
                             $('#longitude').html(longitude);
