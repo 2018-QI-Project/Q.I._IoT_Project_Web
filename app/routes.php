@@ -2,7 +2,46 @@
 // Routes
 
 $app->get('/', 'App\Controller\HomeController:dispatch')
-->setName('homepage');
+->setName('signin');
+
+$app->post('/', 'App\Controller\HomeController:dispatch')
+->setName('signin');
+
+$app->get('/signup', 'App\Controller\HomeController:getsignUp')
+    ->setName('signup');
+
+$app->get('/signout', 'App\Controller\HomeController:getsignout')
+    ->setName('signout');
+
+$app->get('/changepassword', 'App\Controller\HomeController:getchangepassword')
+    ->setName('changepassword');
+
+$app->post('/changepassword', 'App\Controller\HomeController:getchangepassword')
+    ->setName('changepassword');
+
+$app->get('/resetpassword', 'App\Controller\HomeController:getresetpassword')
+    ->setName('findpassword');
+
+$app->get('/dashboard', 'App\Controller\HomeController:getdashboard')
+    ->setName('dashboard');
+
+$app->post('/dashboard', 'App\Controller\HomeController:getdashboard')
+    ->setName('dashboard');
+
+$app->get('/charts', 'App\Controller\HomeController:getcharts')
+    ->setName('charts');
+
+$app->get('/maps', 'App\Controller\HomeController:getmaps')
+    ->setName('maps');
+
+$app->get('/idcancellation', 'App\Controller\HomeController:getidcancellation')
+    ->setName('idcancellation');
+
+$app->post('/idcancellation', 'App\Controller\HomeController:getidcancellation')
+    ->setName('idcancellation');
+
+
+
 
 $app->get('/post/{id}', 'App\Controller\HomeController:viewPost')
 ->setName('view_post');

@@ -31,6 +31,8 @@ final class UserController extends BaseController
         $respiratoryDisease = $json['respiratoryDisease'];
         $cardiovascularDisease = $json['cardiovascularDisease'];
 
+
+
         //DB Connection
         $conn = mysqli_connect(DATABASE_IP, DATABASE_USER, DATABASE_PASSWORD, DATABASE_DATABASE);
 
@@ -198,6 +200,7 @@ final class UserController extends BaseController
             $row = mysqli_fetch_array($result);
 
             $this->view->render($response, 'success.html');
+
         }
         else {
             $data = array(
@@ -514,7 +517,7 @@ final class UserController extends BaseController
             //Content
             $mail->isHTML(true);                                  // Set email format to HTML
             $mail->Subject = 'Here is the New Password From VOGLOG';
-            $mail->Body    = 'New password : '.$newPassword;
+            $mail->Body    = 'New password : '.$newPassword.'<br /><br />Please change your password.';
             $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
 
             $mail->send();
