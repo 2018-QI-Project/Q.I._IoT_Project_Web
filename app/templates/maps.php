@@ -700,6 +700,11 @@
                 <div class="container-fluid">
 
                     <div style="font-size:28px">Real-time Air Quality in Map</div><br>
+                    <!-- AQI Index -->
+                        <div>
+                            <span style="font-size:20px">&nbsp;&nbsp;&nbsp; ▶ AQI Index</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <img src="images/aqi.png" width="1073" height="60">
+                        </div><br>
                     <!-- Real time Air Quality and Heart-Related Data -->
                     <div class="card card-map">
                         <div id="test"></div>

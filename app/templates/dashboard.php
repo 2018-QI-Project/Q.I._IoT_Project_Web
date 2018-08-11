@@ -969,8 +969,8 @@
                                         <div class="col-xs-7">
                                             <div class="numbers">
                                                 <p></p>
-                                                <p>Latitude: <span id="latitude">N/A</span></p>
-                                                <p>Longitude: <span id="longitude">N/A</span></p>
+                                                <p>Lat: <span id="latitude">N/A</span></p>
+                                                <p>Lng: <span id="longitude">N/A</span></p>
                                             </div>
                                         </div>
                                     </div>
