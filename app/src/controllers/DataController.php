@@ -550,7 +550,6 @@ final class DataController extends BaseController
         $sql = "SELECT AVG(CO) AS CO, AVG(NO2) AS NO2, AVG(SO2) AS SO2, AVG(O3) AS O3, AVG(PM2_5) AS PM2_5, AVG(CO_AQI) AS CO_AQI, AVG(NO2_AQI) AS NO2_AQI, AVG(SO2_AQI) AS SO2_AQI, AVG(O3_AQI) AS O3_AQI, AVG(PM2_5_AQI) AS PM2_5_AQI, FROM_UNIXTIME(DATE, '%H') AS HOUR FROM AIR WHERE AIR_SENSOR_ID = $sensorID AND FROM_UNIXTIME(DATE, '%Y-%m-%d')='".$day."' GROUP BY FROM_UNIXTIME(DATE, '%H')";
         $result = mysqli_query($conn, $sql);
 
-        echo $sql;
 
         $airData = array();
 
