@@ -929,15 +929,15 @@
                                         <!-- ICON -->
                                         <div class="col-xs-5">
                                             <div class="icon-big icon-hazardous text-center">
-                                                <i class="ti-cloud"></i>
+                                                <i class="ti-ruler"></i>
                                             </div>
                                         </div>
 
                                         <!-- Sensor Name -->
                                         <div class="col-xs-7">
                                             <div class="numbers">
-                                                <p id="temperature">Temperature</p>
-                                                100
+                                                <p>Temperature</p>
+                                                <span id="temperature">N/A</span>
                                             </div>
                                         </div>
                                     </div>
