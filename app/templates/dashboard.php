@@ -946,7 +946,7 @@
                                     <div class="footer" style="text-align:right">
                                         <hr />
                                         <div class="stats">
-                                            <i class="ti-control-forward"></i> ˚F
+                                            <i class="ti-control-forward"></i> ˚C
                                         </div>
                                     </div>
                                 </div>
