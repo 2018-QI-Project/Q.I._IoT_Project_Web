@@ -270,7 +270,7 @@ final class DataController extends BaseController
 
             $sensorID = $row["SENSOR_ID"];
 
-            $sql = "SELECT DATE, CO, NO2, SO2, O3, PM2_5, CO_AQI, NO2_AQI, SO2_AQI, O3_AQI, PM2_5_AQI, TEMPERATURE, LOCATION_LAT, LOCATION_LON FROM AIR WHERE AIR_SENSOR_ID = '".$sensorID."' AND DATE in (SELECT MAX(DATE) FROM AIR GROUP BY AIR_SENSOR_ID)";
+            $sql = "SELECT DATE, CO, NO2, SO2, O3, PM2_5, CO_AQI, NO2_AQI, SO2_AQI, O3_AQI, PM2_5_AQI, TEMPERATURE, LOCATION_LAT, LOCATION_LON FROM AIR WHERE AIR_SENSOR_ID = '".$sensorID."' AND DATE = (SELECT DATAS.DATE FROM (SELECT DATE, @num := (@num + 1) AS ROW_NUM FROM AIR WHERE AIR_SENSOR_ID = '".$sensorID."' ORDER BY DATE DESC) AS DATAS WHERE ROW_NUM <= 1)";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
