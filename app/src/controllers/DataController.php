@@ -428,7 +428,8 @@ final class DataController extends BaseController
 
             $sensorID = $row["SENSOR_ID"];
 
-            $sql = "SELECT DATE, HEART_RATE, RR_INTERVAL FROM HEART WHERE HEART_SENSOR_ID = '".$sensorID."' AND DATE in (SELECT MAX(DATE) FROM HEART GROUP BY HEART_SENSOR_ID)";
+            mysqli_query($conn, "SET @num = 0");
+            $sql = "SELECT DATE, HEART_RATE, RR_INTERVAL FROM HEART WHERE HEART_SENSOR_ID = '".$sensorID."' AND DATE = (SELECT DATAS.DATE FROM (SELECT DATE, @num := (@num + 1) AS ROW_NUM FROM HEART WHERE HEART_SENSOR_ID = '".$sensorID."' ORDER BY DATE DESC) AS DATAS WHERE ROW_NUM <= 1)";
             $result = mysqli_query($conn, $sql);
             $row = mysqli_fetch_array($result);
 
